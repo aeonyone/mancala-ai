@@ -2,7 +2,7 @@ from multiprocessing.dummy import active_children
 from .constants import *
 
 class Board:
-    def __init__(self,board) -> None:
+    def __init__(self,board=None) -> None:
         # Init custom board or create default one
         if board == None:
             self.board = {HUMAN : [], COMPUTER : []}

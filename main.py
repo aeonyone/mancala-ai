@@ -48,20 +48,29 @@ class AIPlayer:
 
 def main():
     # Init game with no custom board state or custom AI
-    game = Game(WHO_STARTS_GAME, None, None)
+    game = Game()
 
     # Start game
     while(True):
+        legalMoves = game.board.generateLegalMoves(game.activePlayer,game.turnNr,game.turnMove)
+        game.prepareTurn(legalMoves)
+        selectedPit = game.selectPit(legalMoves)
+        if legalMoves != []:
+            if game.executeTurn(selectedPit,legalMoves):
+                game.turnMove += 1
+            else: # If turn ends
+                game.turnMove = 0
+
         if game.winner() != None:
+            # NB! Bug if one side gets additional move, but is without seeds. The game does not end.
             print('\nFinal board:\n')
             game.board.drawBoard()
             print("\n Winner is " + game.winner() + "\n")
             break
+
         elif game.status != 'ONGOING':
             print("\n Game over!\n")
             break
-        else:
-            game.executeTurn()
 
 
 if __name__ == '__main__':

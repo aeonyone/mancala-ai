@@ -7,38 +7,52 @@ from .constants import *
 
 # NB! Make tests for model, alphabeta is definitely losing information in the pruning process
     # However, this loss is not apparent in shallow levels
-class AI:
-    def __init__(self, model) -> None:
+class Model:
+    def __init__(self, algorithm=None, depth=None) -> None:
         # Use default model if not otherwise specified
-        if model == None:
-            self.model = 'minimax'
-        else:
-            self.model = model
+        self.algorithm = 'minimax' if algorithm is None else algorithm
+        self.depth = AI_DEPTH if depth is None else depth
         self.posInf = 1000
         self.negInf = -1000
 
-    def bestTurn(self, model, board, depth, maximizingPlayer, alpha, beta):
-        if model == 'minimax':
+    def _initTurn(self, game):
+        self.turnNr = game.turnNr
+        self.turnMove = game.turnMove
+
+    def _exitTurn(self):
+        self.turnNr = 0
+        self.turnMove = 0
+
+    def bestTurn(self, algorithm, board, depth, maximizingPlayer, alpha, beta):
+        if algorithm == 'minimax':
             return self.minimax(board, depth, maximizingPlayer)
-        elif model == 'alphabeta':
+        elif algorithm == 'alphabeta':
             return self.alphabeta(board, depth, maximizingPlayer, alpha, beta)
         else:
             return None
-
+    
     # NB! Implement alpha-beta pruning
     def minimax(self, board, depth, maximizingPlayer):
         if depth == 0 or board.winner() != None:
+            # NB! Should set values to inf if model finds winning solution
             return board.evaluateBoard()
 
         if maximizingPlayer:
             value = self.negInf # float('-inf')
             scoreDict = {}
-            for selectedPit in board.generateLegalMoves(COMPUTER, 0, 0): # Need to fix
+            legalMoves = board.generateLegalMoves(COMPUTER, 0, 0)
+            if self.turnNr == 1 and self.turnMove == 0:
+                legalMoves.append(0)
+                self._exitTurn()
+            for selectedPit in legalMoves:
                 sideBranch = value
                 # Replicate board
                 tempBoard = deepcopy(board)
                 while(True):
-                    if not tempBoard.sowSeeds(COMPUTER, selectedPit):
+                    if selectedPit == 0:
+                        tempBoard.rotateBoard()
+                        break
+                    elif not tempBoard.sowSeeds(COMPUTER, selectedPit):
                         break
                     else: # Additional move
                         sideBranch = self.minimax(tempBoard, depth - 1, True) # Launch new branch
@@ -49,7 +63,7 @@ class AI:
             if scoreDict != {}: # If scoreDict is empty, it means that no turn can be made, e.g. in case when last pit is captured
                 value = max(value, scoreDict[max(scoreDict, key=scoreDict.get)])
             # Return best turn at the root node
-            if depth == AI_DEPTH:
+            if depth == self.depth:
                 strongestMoves = []
                 for i in scoreDict:
                     if scoreDict[i] == value:
@@ -62,11 +76,18 @@ class AI:
         else: # Minimizing player
             value = self.posInf # float('inf')
             scoreDict = {}
-            for selectedPit in board.generateLegalMoves(HUMAN, 0, 0): # Need to fix
+            legalMoves = board.generateLegalMoves(HUMAN, 0, 0)
+            if self.turnNr == 1 and self.turnMove == 0:
+                legalMoves.append(0)
+                self._exitTurn()
+            for selectedPit in legalMoves:
                 sideBranch = value
                 tempBoard = deepcopy(board)
                 while(True):
-                    if not tempBoard.sowSeeds(HUMAN, selectedPit):
+                    if selectedPit == 0:
+                        tempBoard.rotateBoard()
+                        break
+                    elif not tempBoard.sowSeeds(HUMAN, selectedPit):
                         break
                     else: # Additional move
                         sideBranch = self.minimax(tempBoard, depth - 1, False) # Launch new branch
@@ -78,7 +99,7 @@ class AI:
                 value = min(value, scoreDict[min(scoreDict, key=scoreDict.get)])
             
             # Return best turn at the root node
-            if depth == AI_DEPTH:
+            if depth == self.depth:
                 strongestMoves = []
                 for i in scoreDict:
                     if scoreDict[i] == value:
@@ -117,7 +138,7 @@ class AI:
                 value = max(value, scoreDict[max(scoreDict, key=scoreDict.get)])
 
             # Return best turn at the root node
-            if depth == AI_DEPTH:
+            if depth == self.depth:
                 strongestMoves = []
                 for i in scoreDict:
                     if scoreDict[i] == value:

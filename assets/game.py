@@ -4,27 +4,18 @@ import random
 
 from .constants import *
 from assets.board import Board
-from assets.ai import AI
+from assets.model import Model
 
 class Game:
-    def __init__(self, whoStartsGame, board, model) -> None:
-        if whoStartsGame == None:
-            self.whoStartsGame = HUMAN
-        else:
-            self.whoStartsGame = whoStartsGame
+    def __init__(self, whoStartsGame=None, board=None, model=None) -> None:
+        self.whoStartsGame = WHO_STARTS_GAME if whoStartsGame is None else whoStartsGame
         self.activePlayer = self.assignFirstTurn()
+        self.board = Board(BOARD_STARTING_STATE) if board is None else board
+        self.model = Model(AI_MODEL) if board is None else model
         self.status = 'ONGOING'
         self.turnNr = 0
-        # Init board based on passed board
-        if board == None:
-            self.board = Board(BOARD_STARTING_STATE)
-        else:
-            self.board = board
-        # Init AI based on passed model
-        if model == None:
-            self.AI = AI(AI_MODEL)
-        else:
-            self.AI = model
+        self.turnMove = 0
+
 
     def assignFirstTurn(self):
         if self.whoStartsGame == RANDOM:
@@ -35,61 +26,53 @@ class Game:
 
         return self.whoStartsGame
 
+    def prepareTurn(self, legalMoves):
+        if not self.board.isBoardValid():
+            print('ERROR: board not valid')
+        print('turnNr: ' + str(self.turnNr), 'turnMove: ' + str(self.turnMove))
+        self.board.drawBoard()
 
-    def executeTurn(self):
+        if legalMoves == []:
+            # I think this should not actually move beans to stores, just consider them as points
+            self.status = self.board.allPitsToPlayersStores()
+            return 
+
+    def selectPit(self, legalMoves=None):
+        if self.activePlayer == HUMAN:
+            print('\nPlease input pit:', end = ' ')
+            while(True):
+                try:
+                    return int(input())
+                except ValueError:
+                    print('Please input a number in ' + str(legalMoves))
+
+        else: # COMPUTER TURN
+            self.model._initTurn(self)
+            return self.model.bestTurn(self.model.algorithm, self.board, self.model.depth, True, self.model.negInf, self.model.posInf)
+
+    def executeTurn(self, selectedPit, legalMoves):
         # NB! Fix bug with not showing board before turn is made. This is actually threading bug somehow with sleep
-        while(True):
-            if not self.board.isBoardValid():
-                print('ERROR: board not valid')
-            self.board.drawBoard()
-            turnMove = 0 
-            legalMoves = self.board.generateLegalMoves(self.activePlayer,self.turnNr,turnMove)
-            if legalMoves == []:
-                # I think this should not actually move beans to stores, just consider them as points
-                self.status = self.board.allPitsToPlayersStores()
-                break
+        if self.activePlayer == COMPUTER:
+            print('\nComputer chooses pit:' + str(selectedPit))
 
-            elif self.activePlayer == HUMAN:
-                print('\nPlease input pit:', end = ' ')
-                while(True):
-                    try:
-                        selectedPit = int(input())
-                        break
-                    except ValueError:
-                        print('Please input a number')
-                if selectedPit in legalMoves:
-                    if selectedPit == 0:
-                        self.board.rotateBoard()
-                        self.changeTurn()
-                        break
-                    elif not self.board.sowSeeds(self.activePlayer,selectedPit):
-                        self.changeTurn()
-                        break
-                    else:
-                        print("\nHave one more turn\n")
-                        turnMove += 1 
-                else:
-                    print('Selected pit is not a legal move')
-        
-            else: # COMPUTER TURN
+        if selectedPit in legalMoves:
+            if selectedPit == 0:
+                self.board.rotateBoard()
+                self.changeTurn()
+                return False
 
-                # selectedPit = random.choice(legalMoves)
-                # selectedPit = self.AI.minimax(self.board, AI_DEPTH, True)
-                selectedPit = self.AI.bestTurn(self.AI.model, self.board, AI_DEPTH, True, self.AI.negInf, self.AI.posInf)
-                print('\nComputer chooses pit:' + str(selectedPit))
-                if selectedPit == 0:
-                    self.board.rotateBoard()
-                    self.changeTurn()
-                    break
-                elif not self.board.sowSeeds(self.activePlayer,selectedPit):
-                    self.changeTurn()
-                    break
-                else:
-                    # Check if game has winner
-                    if self.winner() != None:
-                        break
-                    print("\nComputer goes again\n")
-                    turnMove += 1
+            elif not self.board.sowSeeds(self.activePlayer,selectedPit):
+                self.changeTurn()
+                return False
+
+            else:
+                # Check if game has winner
+                if self.winner() == None:
+                    print("\nOne more turn awarded to " + self.activePlayer)
+                return True
+
+        else:
+            print('Selected pit is not a legal move')
 
     def changeTurn(self):
         if self.activePlayer == HUMAN:
@@ -100,9 +83,6 @@ class Game:
 
     def winner(self):
         return self.board.winner()
-
-    def _init(self):
-        pass
 
     def userInput(self):
         # Do later
