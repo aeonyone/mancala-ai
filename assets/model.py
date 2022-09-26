@@ -5,6 +5,10 @@ from .constants import *
 # NB ! Implement shallow, e.g. 6 - 7 layers of investigative minimax, and then for best few branches go really deep
     # 20% / 80 % effort respectively
 
+# NB ! Test what is best way to sort legal moves (e.g. by size or by position), to improve pruning 
+
+# NB! It appears there is bug with Computer starting play, it does not consider that board can be switched in second turn
+
 # NB! Make tests for model, alphabeta is definitely losing information in the pruning process
     # However, this loss is not apparent in shallow levels
 class Model:
@@ -69,7 +73,7 @@ class Model:
                     if scoreDict[i] == value:
                         strongestMoves.append(i)
                 returnPit = random.choice(strongestMoves)
-                return returnPit
+                return returnPit, value
             else: # If not at the root node
                 return value
 

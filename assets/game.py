@@ -48,12 +48,14 @@ class Game:
 
         else: # COMPUTER TURN
             self.model._initTurn(self)
-            return self.model.bestTurn(self.model.algorithm, self.board, self.model.depth, True, self.model.negInf, self.model.posInf)
+            selectedPit, value = self.model.bestTurn(self.model.algorithm, self.board, self.model.depth, True, self.model.negInf, self.model.posInf)
+            print("\nComputer evaluates board to " + str(value))
+            return selectedPit
 
     def executeTurn(self, selectedPit, legalMoves):
         # NB! Fix bug with not showing board before turn is made. This is actually threading bug somehow with sleep
         if self.activePlayer == COMPUTER:
-            print('\nComputer chooses pit:' + str(selectedPit))
+            print('Computer chooses pit:' + str(selectedPit))
 
         if selectedPit in legalMoves:
             if selectedPit == 0:
