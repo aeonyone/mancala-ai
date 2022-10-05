@@ -7,7 +7,10 @@ from .constants import *
 
 # NB ! Test what is best way to sort legal moves (e.g. by size or by position), to improve pruning 
 
-# NB! It appears there is bug with Computer starting play, it does not consider that board can be switched in second turn
+# Maybe game.self should be passed in the model, it would simplify a lot?
+# Fix bug where "TypeError: cannot unpack non-iterable int object" if computer must make turn, but can't
+# Fix bug where game does not end, if player cannot make turn
+# Need to generalize actions between both minimax and alphabeta models
 
 # NB! Make tests for model, alphabeta is definitely losing information in the pruning process
     # However, this loss is not apparent in shallow levels
@@ -35,7 +38,6 @@ class Model:
         else:
             return None
     
-    # NB! Implement alpha-beta pruning
     def minimax(self, board, depth, maximizingPlayer):
         if depth == 0 or board.winner() != None:
             # NB! Should set values to inf if model finds winning solution
@@ -44,11 +46,7 @@ class Model:
         if maximizingPlayer:
             value = self.negInf # float('-inf')
             scoreDict = {}
-            legalMoves = board.generateLegalMoves(COMPUTER, 0, 0)
-            if self.turnNr == 1 and self.turnMove == 0:
-                legalMoves.append(0)
-                self._exitTurn()
-            for selectedPit in legalMoves:
+            for selectedPit in board.generateLegalMoves(COMPUTER, self.turnNr, self.turnMove):
                 sideBranch = value
                 # Replicate board
                 tempBoard = deepcopy(board)
@@ -81,9 +79,8 @@ class Model:
             value = self.posInf # float('inf')
             scoreDict = {}
             legalMoves = board.generateLegalMoves(HUMAN, 0, 0)
-            if self.turnNr == 1 and self.turnMove == 0:
+            if self.turnNr == 0 and depth >= self.depth - 2: # Force computer to consider player switching board after Conputer first turn
                 legalMoves.append(0)
-                self._exitTurn()
             for selectedPit in legalMoves:
                 sideBranch = value
                 tempBoard = deepcopy(board)
@@ -102,6 +99,7 @@ class Model:
             if scoreDict != {}: # If scoreDict is empty, it means that no turn can be made, e.g. in case when last pit is captured
                 value = min(value, scoreDict[min(scoreDict, key=scoreDict.get)])
             
+            # NB! This likely should be removed, because minimizing player (Human) will not be at the root node 
             # Return best turn at the root node
             if depth == self.depth:
                 strongestMoves = []
@@ -113,7 +111,7 @@ class Model:
             else: # If not at the root node
                 return value
 
-    # NB! alphabeta is bugged and choses first available turn
+    # NB! alphabeta move generates 0 seeds in hand bug at position {HUMAN : [4, 4, 0, 0, 5, 5], COMPUTER : [5, 5, 4, 4, 4, 4]}
     def alphabeta(self, board, depth, maximizingPlayer, alpha, beta):
         if depth == 0 or board.winner() != None:
             return board.evaluateBoard()   
@@ -121,7 +119,8 @@ class Model:
         if maximizingPlayer:
             value = self.negInf # float('-inf')
             scoreDict = {}
-            for selectedPit in board.generateLegalMoves(COMPUTER, 0, 0): # Need to fix
+            legalMoves = board.generateLegalMoves(COMPUTER, self.turnNr, self.turnMove)
+            for selectedPit in legalMoves:
                 sideBranch = value
                 # Replicate board
                 tempBoard = deepcopy(board)
@@ -148,14 +147,17 @@ class Model:
                     if scoreDict[i] == value:
                         strongestMoves.append(i)
                 returnPit = random.choice(strongestMoves)
-                return returnPit
+                return returnPit, value
             else: # If not at the root node
                 return value
 
         else: # Minimizing player
             value = self.posInf # float('inf')
             scoreDict = {}
-            for selectedPit in board.generateLegalMoves(HUMAN, 0, 0): # Need to fix
+            legalMoves = board.generateLegalMoves(HUMAN, 0, 0)
+            if self.turnNr == 0 and depth >= self.depth - 2: # Force computer to consider player switching board after Conputer first turn
+                legalMoves.append(0)
+            for selectedPit in legalMoves:
                 sideBranch = value
                 tempBoard = deepcopy(board)
                 while(True):

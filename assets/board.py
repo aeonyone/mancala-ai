@@ -85,10 +85,10 @@ class Board:
                     else: # Opponent board
                         activeBoardSide = self.switchActiveBoardSide(activeBoardSide)
                         activePit = 0
-                        if activePlayer == HUMAN and self.board[COMPUTER][LIST_LEN - activePit] > 0: # Check if there is anything to capture in the opponent pit
+                        if activePlayer == HUMAN and self.board[activeBoardSide][activePit] == 0 and self.board[COMPUTER][LIST_LEN - activePit] > 0: # Check if there is anything to capture in the opponent pit
                             self.score[activePlayer] += 1 + self.board[COMPUTER][LIST_LEN - activePit] # Steal beans
                             self.board[COMPUTER][LIST_LEN - activePit] = 0 # Set opponent pit to 0
-                        elif activePlayer == COMPUTER and self.board[HUMAN][LIST_LEN - activePit] > 0: 
+                        elif activePlayer == COMPUTER and self.board[activeBoardSide][activePit] == 0 and self.board[HUMAN][LIST_LEN - activePit] > 0: 
                             self.score[activePlayer] += 1 + self.board[HUMAN][LIST_LEN - activePit] # Steal beans
                             self.board[HUMAN][LIST_LEN - activePit] = 0 # Set opponent pit to 0    
                         else: # If there are no seeds to capture
