@@ -1,5 +1,11 @@
 from multiprocessing.dummy import active_children
 from .constants import *
+import numpy as np
+
+
+
+# Increment all pits
+
 
 class Board:
     def __init__(self,board=None) -> None:
@@ -27,74 +33,69 @@ class Board:
         print(" ", playerBoard)  # Player board
 
     def sowSeeds(self, activePlayer, pit):
-        # NB! Use modulus to execute full circle and full board turns at once. Then only few operations are left to loops.
-        # This can be made to work even if it goes 100 circles.
-        # Use map function to increment list at once
+        # NB! Use numpy array for board to increment all pits at once
         activePit = pit - 1 # Take note of the active pit and map it to the list
         seedsInHand = self.board[activePlayer][activePit] # Get seeds from pit
         self.board[activePlayer][activePit] = 0 # Set seeds in pit to 0
         activeBoardSide = activePlayer # Take note of the current board side
         while(True):
-            if activePit == 6:
-                activePit = 0
-            else:
-                activePit += 1
-
-            # NB implement modules to solve the outcome of sowing
-            if seedsInHand == 0: # To handle minimax bug
-                print(activePlayer, self.board, 'ERROR: Seeds in hand == 0')
-                break
-            if seedsInHand > 1:
-                if activePit < 6:
-                    self.board[activeBoardSide][activePit] += 1 # Drop a seed in a pit
-                    seedsInHand -= 1
-                else: # activePit == 6
-                    if activeBoardSide == activePlayer:
-                        self.score[activePlayer] += 1 # Drop seed in active player store
-                        seedsInHand -= 1
-                        activeBoardSide = self.switchActiveBoardSide(activeBoardSide)
-                        # Leave activePit as 6
-                    else: # activeBoardSide != activePlayer
-                        activeBoardSide = self.switchActiveBoardSide(activeBoardSide)
-                        activePit = 0
-                        self.board[activeBoardSide][activePit] += 1
-                        seedsInHand -= 1
-            # NB make function for capturing opponent store
-            else: # seedsInHand == 1
-                if activePit < 6:
-                    if activeBoardSide == activePlayer:
-                        if self.board[activeBoardSide][activePit] == 0:
-                            if activePlayer == HUMAN and self.board[COMPUTER][LIST_LEN - activePit] > 0: # Check if there is anything to capture in the opponent pit
-                                self.score[activePlayer] += 1 + self.board[COMPUTER][LIST_LEN - activePit] # Steal beans
-                                self.board[COMPUTER][LIST_LEN - activePit] = 0 # Set opponent pit to 0
-                            elif activePlayer == COMPUTER and self.board[HUMAN][LIST_LEN - activePit] > 0: 
-                                self.score[activePlayer] += 1 + self.board[HUMAN][LIST_LEN - activePit] # Steal beans
-                                self.board[HUMAN][LIST_LEN - activePit] = 0 # Set opponent pit to 0    
-                            else: # If there are no seeds to capture
-                                self.board[activeBoardSide][activePit] += 1
-                            return False
-                        else: # Pit not empty
-                            self.board[activeBoardSide][activePit] += 1 # Drop a seed in a pit
-                            return False
-                    else: # activeBoardSide != activePlayer
-                        self.board[activeBoardSide][activePit] += 1 # Drop a seed in a pit
-                        return False
-                else: # activePit == 6
-                    if activeBoardSide == activePlayer:
-                        self.score[activePlayer] += 1
-                        return True
-                    else: # Opponent board
-                        activeBoardSide = self.switchActiveBoardSide(activeBoardSide)
-                        activePit = 0
-                        if activePlayer == HUMAN and self.board[activeBoardSide][activePit] == 0 and self.board[COMPUTER][LIST_LEN - activePit] > 0: # Check if there is anything to capture in the opponent pit
-                            self.score[activePlayer] += 1 + self.board[COMPUTER][LIST_LEN - activePit] # Steal beans
-                            self.board[COMPUTER][LIST_LEN - activePit] = 0 # Set opponent pit to 0
-                        elif activePlayer == COMPUTER and self.board[activeBoardSide][activePit] == 0 and self.board[HUMAN][LIST_LEN - activePit] > 0: 
-                            self.score[activePlayer] += 1 + self.board[HUMAN][LIST_LEN - activePit] # Steal beans
-                            self.board[HUMAN][LIST_LEN - activePit] = 0 # Set opponent pit to 0    
-                        else: # If there are no seeds to capture
-                            self.board[activeBoardSide][activePit] += 1
-                        return False
+            if activeBoardSide == activePlayer: # If current board side is active player's
+                # Three cases are possible:
+                # Seeds in hand does not reach the score pit
+                if seedsInHand <= PITS - activePit - 1:
+                    # Increment seedsInHand number of pits
+                    self.board[activePlayer][activePit + 1 : activePit + 1 + seedsInHand] = map(lambda x: x + 1, self.board[activePlayer][activePit + 1 : activePit + 1 + seedsInHand])
+                    # Set the active pit to last dropped seed
+                    activePit = activePit + seedsInHand
+                    break
+                # Seeds in hand reaches the score pit exactly
+                elif seedsInHand == PITS - activePit:
+                    # Increment seedsInHand number of pits
+                    self.board[activePlayer][activePit + 1 : PITS] = map(lambda x: x + 1, self.board[activePlayer][activePit + 1 : PITS]) 
+                    # Increment score
+                    self.score[activePlayer] += 1
+                    # Get additional turn
+                    return True
+                # Seeds in hand can reach beyond the score pit 
+                else: # seedsInHand > PITS - activePit:
+                    # Increment seedsInHand number of pits
+                    self.board[activePlayer][activePit + 1 : PITS] = map(lambda x: x + 1, self.board[activePlayer][activePit + 1 : PITS]) 
+                    # Increment score
+                    self.score[activePlayer] += 1
+                    # Subtract the number of pits that were incremented
+                    seedsInHand -= PITS - activePit
+                    # Set active pit to 0
+                    activePit = 0
+                    # Switch active board side
+                    activeBoardSide = self.switchActiveBoardSide(activeBoardSide)
+                    continue
+            else: # If current board side is opponent's
+                # Two cases are possible:
+                # Seeds in hand reaches up to or including the last pit
+                if seedsInHand <= PITS:
+                    # Increment seedsInHand number of pits
+                    self.board[activeBoardSide][activePit : activePit + seedsInHand] = map(lambda x: x + 1, self.board[activeBoardSide][activePit : activePit + seedsInHand])
+                    break
+                # Seeds in hand go beyond last pit
+                else: # seedsInHand > PITS:
+                    # Increment all pits
+                    self.board[activeBoardSide][activePit : PITS] = map(lambda x: x + 1, self.board[activeBoardSide][activePit : PITS])
+                    # Subtract the number of pits that were incremented
+                    seedsInHand -= PITS - activePit
+                    # Set active pit to -1 (to be incremented to 0)
+                    activePit = -1
+                    # Switch active board side
+                    activeBoardSide = self.switchActiveBoardSide(activeBoardSide)
+                    continue
+                
+        # Capture logic. Check if last seed was dropped in empty pit in active player's side and if opponent's pit is not empty
+        if activeBoardSide == activePlayer:
+            if self.board[activePlayer][activePit] == 1:
+                if self.board[self.switchActiveBoardSide(activePlayer)][PITS - activePit - 1] > 0:
+                    # Take all seeds from both pits
+                    self.score[activePlayer] += self.board[activePlayer][activePit] + self.board[self.switchActiveBoardSide(activePlayer)][PITS - activePit - 1]
+                    self.board[activePlayer][activePit] = self.board[self.switchActiveBoardSide(activePlayer)][PITS - activePit - 1] = 0
+        return False
 
     def switchActiveBoardSide(self,activeBoardSide):
         if activeBoardSide == HUMAN:
