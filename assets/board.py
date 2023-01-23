@@ -29,6 +29,7 @@ class Board:
     def sowSeeds(self, activePlayer, pit):
         # NB! Use modulus to execute full circle and full board turns at once. Then only few operations are left to loops.
         # This can be made to work even if it goes 100 circles.
+        # Use map function to increment list at once
         activePit = pit - 1 # Take note of the active pit and map it to the list
         seedsInHand = self.board[activePlayer][activePit] # Get seeds from pit
         self.board[activePlayer][activePit] = 0 # Set seeds in pit to 0

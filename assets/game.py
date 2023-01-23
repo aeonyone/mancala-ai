@@ -1,4 +1,3 @@
-from assets.board import Board
 import random
 # import threading
 
@@ -15,7 +14,6 @@ class Game:
         self.status = 'ONGOING'
         self.turnNr = 0
         self.turnMove = 0
-
 
     def assignFirstTurn(self):
         if self.whoStartsGame == RANDOM:

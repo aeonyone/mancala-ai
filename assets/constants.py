@@ -2,12 +2,12 @@
 PITS = 6 # Number of pits in each player board side
 SEEDS = 4 # Number of seeds in each pit
 
-# DO NOT MODIFY BELOW
+
 LIST_LEN = PITS - 1 # Do not modify
-HUMAN = 'Human'
-COMPUTER = 'Computer'
-RANDOM = 'Random'
-# DO NOT MODIFY ABOVE
+HUMAN = 'Human' # Do not modify
+COMPUTER = 'Computer' # Do not modify
+RANDOM = 'Random' # Do not modify
+
 
 
 AI_DEPTH = 9 # Depth of AI model in turns
