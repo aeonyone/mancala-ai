@@ -15,37 +15,6 @@ from assets.constants import *
         # 
         #  
 
-class HumanPlayer:
-    def __init__(self) -> None:
-        pass
-
-    
-    # Collect user input
-    def collectInput(self):
-        input = int(input)
-
-    
-    def isLegalMove(self):
-        # Test if the pit is not empty
-        pass
-        # 
-
-    def sow(self):
-
-        # Check if move is legal
-        while(True):
-           
-            # Test if the pit is not empty
-             pass
-        pass
-
-# TBD
-class AIPlayer:
-    def __init__(self) -> None:
-        pass
-
-
-
 def main():
     # Init game with no custom board state or custom AI
     game = Game()

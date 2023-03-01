@@ -8,21 +8,18 @@ from assets.model import Model
 class Game:
     def __init__(self, whoStartsGame=None, board=None, model=None) -> None:
         self.whoStartsGame = WHO_STARTS_GAME if whoStartsGame is None else whoStartsGame
-        self.activePlayer = self.assignFirstTurn()
         self.board = Board(BOARD_STARTING_STATE) if board is None else board
         self.model = Model(AI_MODEL) if board is None else model
+        if self.whoStartsGame == RANDOM:
+            if random.randint(0,1) == 0:
+                self.activePlayer = PLAYER_1
+            else:
+                self.activePlayer = PLAYER_2
+        else:
+            self.activePlayer = self.whoStartsGame
         self.status = 'ONGOING'
         self.turnNr = 0
         self.turnMove = 0
-
-    def assignFirstTurn(self):
-        if self.whoStartsGame == RANDOM:
-            if random.randint(0,1) == 0:
-                return HUMAN
-            else:
-                return COMPUTER
-
-        return self.whoStartsGame
 
     def prepareTurn(self, legalMoves):
         if not self.board.isBoardValid():
@@ -36,7 +33,7 @@ class Game:
             return 
 
     def selectPit(self, legalMoves=None):
-        if self.activePlayer == HUMAN:
+        if self.activePlayer == "Human":
             print('\nPlease input pit:', end = ' ')
             while(True):
                 try:
@@ -44,7 +41,7 @@ class Game:
                 except ValueError:
                     print('Please input a number in ' + str(legalMoves))
 
-        else: # COMPUTER TURN
+        else: # Computer
             self.model._initTurn(self)
             selectedPit, value = self.model.bestTurn(self.model.algorithm, self.board, self.model.depth, True, self.model.negInf, self.model.posInf)
             print("\nComputer evaluates board to " + str(value))
@@ -52,7 +49,7 @@ class Game:
 
     def executeTurn(self, selectedPit, legalMoves):
         # NB! Fix bug with not showing board before turn is made. This is actually threading bug somehow with sleep
-        if self.activePlayer == COMPUTER:
+        if self.activePlayer == "Computer":
             print('Computer chooses pit:' + str(selectedPit))
 
         if selectedPit in legalMoves:
@@ -75,10 +72,10 @@ class Game:
             print('Selected pit is not a legal move')
 
     def changeTurn(self):
-        if self.activePlayer == HUMAN:
-            self.activePlayer = COMPUTER
+        if self.activePlayer == PLAYER_1:
+            self.activePlayer = PLAYER_2
         else:
-            self.activePlayer = HUMAN
+            self.activePlayer = PLAYER_1
         self.turnNr += 1
 
     def winner(self):

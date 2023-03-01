@@ -46,7 +46,7 @@ class Model:
         if maximizingPlayer:
             value = self.negInf # float('-inf')
             scoreDict = {}
-            for selectedPit in board.generateLegalMoves(COMPUTER, self.turnNr, self.turnMove):
+            for selectedPit in board.generateLegalMoves(PLAYER_2, self.turnNr, self.turnMove):
                 sideBranch = value
                 # Replicate board
                 tempBoard = deepcopy(board)
@@ -54,7 +54,7 @@ class Model:
                     if selectedPit == 0:
                         tempBoard.rotateBoard()
                         break
-                    elif not tempBoard.sowSeeds(COMPUTER, selectedPit):
+                    elif not tempBoard.sowSeeds(PLAYER_2, selectedPit):
                         break
                     else: # Additional move
                         sideBranch = self.minimax(tempBoard, depth - 1, True) # Launch new branch
@@ -78,7 +78,7 @@ class Model:
         else: # Minimizing player
             value = self.posInf # float('inf')
             scoreDict = {}
-            legalMoves = board.generateLegalMoves(HUMAN, 0, 0)
+            legalMoves = board.generateLegalMoves(PLAYER_1, 0, 0)
             if self.turnNr == 0 and depth >= self.depth - 2: # Force computer to consider player switching board after Conputer first turn
                 legalMoves.append(0)
             for selectedPit in legalMoves:
@@ -88,7 +88,7 @@ class Model:
                     if selectedPit == 0:
                         tempBoard.rotateBoard()
                         break
-                    elif not tempBoard.sowSeeds(HUMAN, selectedPit):
+                    elif not tempBoard.sowSeeds(PLAYER_1, selectedPit):
                         break
                     else: # Additional move
                         sideBranch = self.minimax(tempBoard, depth - 1, False) # Launch new branch
@@ -111,7 +111,7 @@ class Model:
             else: # If not at the root node
                 return value
 
-    # NB! alphabeta move generates 0 seeds in hand bug at position {HUMAN : [4, 4, 0, 0, 5, 5], COMPUTER : [5, 5, 4, 4, 4, 4]}
+    # NB! alphabeta move generates 0 seeds in hand bug at position {PLAYER_1 : [4, 4, 0, 0, 5, 5], PLAYER_2 : [5, 5, 4, 4, 4, 4]}
     def alphabeta(self, board, depth, maximizingPlayer, alpha, beta):
         if depth == 0 or board.winner() != None:
             return board.evaluateBoard()   
@@ -119,13 +119,13 @@ class Model:
         if maximizingPlayer:
             value = self.negInf # float('-inf')
             scoreDict = {}
-            legalMoves = board.generateLegalMoves(COMPUTER, self.turnNr, self.turnMove)
+            legalMoves = board.generateLegalMoves(PLAYER_2, self.turnNr, self.turnMove)
             for selectedPit in legalMoves:
                 sideBranch = value
                 # Replicate board
                 tempBoard = deepcopy(board)
                 while(True):
-                    if not tempBoard.sowSeeds(COMPUTER, selectedPit):
+                    if not tempBoard.sowSeeds(PLAYER_2, selectedPit):
                         break
                     else: # Additional move
                         sideBranch = self.alphabeta(tempBoard, depth - 1, True, alpha, beta) # Launch new branch
@@ -154,14 +154,14 @@ class Model:
         else: # Minimizing player
             value = self.posInf # float('inf')
             scoreDict = {}
-            legalMoves = board.generateLegalMoves(HUMAN, 0, 0)
+            legalMoves = board.generateLegalMoves(PLAYER_1, 0, 0)
             if self.turnNr == 0 and depth >= self.depth - 2: # Force computer to consider player switching board after Conputer first turn
                 legalMoves.append(0)
             for selectedPit in legalMoves:
                 sideBranch = value
                 tempBoard = deepcopy(board)
                 while(True):
-                    if not tempBoard.sowSeeds(HUMAN, selectedPit):
+                    if not tempBoard.sowSeeds(PLAYER_1, selectedPit):
                         break
                     else: # Additional move
                         sideBranch = self.alphabeta(tempBoard, depth - 1, False, alpha, beta) # Launch new branch

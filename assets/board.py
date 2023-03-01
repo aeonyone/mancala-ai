@@ -11,25 +11,22 @@ class Board:
     def __init__(self,board=None) -> None:
         # Init custom board or create default one
         if board == None:
-            self.board = {HUMAN : [], COMPUTER : []}
-            self.createBoard()
+            self.board = {PLAYER_1 : [], PLAYER_2 : []}
+            for i in self.board:
+                for j in range(PITS):
+                    self.board[i].append(SEEDS)
         else:
             self.board = board
-        self.score = {HUMAN : 0, COMPUTER : 0}
+        self.score = {PLAYER_1 : 0, PLAYER_2 : 0}
         self.maxScore = PITS * SEEDS * 2
-        
-    def createBoard(self):
-        for i in self.board:
-            for j in range(PITS):
-                self.board[i].append(SEEDS)
 
     def drawBoard(self):
         # NB! Fix the hardcoded oponnent and player keys
-        playerBoard = self.board[HUMAN]
-        opponentBoard = list(reversed(self.board[COMPUTER]))
+        playerBoard = self.board[PLAYER_1]
+        opponentBoard = list(reversed(self.board[PLAYER_2]))
         
         print(" ",opponentBoard) # Reverse opponent board
-        print(self.score[COMPUTER], " " * 19, self.score[HUMAN]) # Stores
+        print(self.score[PLAYER_2], " " * 19, self.score[PLAYER_1]) # Stores
         print(" ", playerBoard)  # Player board
 
     def sowSeeds(self, activePlayer, pit):
@@ -98,10 +95,10 @@ class Board:
         return False
 
     def switchActiveBoardSide(self,activeBoardSide):
-        if activeBoardSide == HUMAN:
-            return COMPUTER
-        else: #COMPUTER
-            return HUMAN
+        if activeBoardSide == PLAYER_1:
+            return PLAYER_2
+        else: #PLAYER_2
+            return PLAYER_1
 
     def generateLegalMoves(self,activePlayer,turnNr,turnMove):
         moves = []
@@ -113,37 +110,35 @@ class Board:
         return moves
 
     def allPitsToPlayersStores(self):
-        self.score[HUMAN] += sum(self.board[HUMAN]) 
-        self.score[COMPUTER] += sum(self.board[COMPUTER])
-        self.board[HUMAN] = self.board[COMPUTER] = [0] * PITS
+        self.score[PLAYER_1] += sum(self.board[PLAYER_1]) 
+        self.score[PLAYER_2] += sum(self.board[PLAYER_2])
+        self.board[PLAYER_1] = self.board[PLAYER_2] = [0] * PITS
         return 'DONE'
 
     def rotateBoard(self):
         # Rotate board
-        tempBoard = self.board[COMPUTER]
-        self.board[COMPUTER] = self.board[HUMAN]
-        self.board[HUMAN] = tempBoard
+        tempBoard = self.board[PLAYER_2]
+        self.board[PLAYER_2] = self.board[PLAYER_1]
+        self.board[PLAYER_1] = tempBoard
         # Rotate score
-        tempScore = self.score[COMPUTER]
-        self.score[COMPUTER] = self.score[HUMAN]
-        self.score[HUMAN] = tempScore
+        tempScore = self.score[PLAYER_2]
+        self.score[PLAYER_2] = self.score[PLAYER_1]
+        self.score[PLAYER_1] = tempScore
 
     # Check if game is over
     def winner(self):
-        if self.score[HUMAN] > self.maxScore / 2:
-            return HUMAN
-        elif self.score[COMPUTER] > self.maxScore / 2:
-            return COMPUTER
-        elif self.score[HUMAN] == self.score[COMPUTER] ==  self.maxScore / 2:
+        if self.score[PLAYER_1] > self.maxScore / 2:
+            return PLAYER_1
+        elif self.score[PLAYER_2] > self.maxScore / 2:
+            return PLAYER_2
+        elif self.score[PLAYER_1] == self.score[PLAYER_2] ==  self.maxScore / 2:
             return 'DRAW'
 
         return None
 
     def evaluateBoard(self):
-        return self.score[COMPUTER] - self.score[HUMAN]
+        return self.score[PLAYER_2] - self.score[PLAYER_1]
 
 
     def isBoardValid(self):
-        return self.score[HUMAN] + self.score[COMPUTER] + sum(self.board[HUMAN]) + sum(self.board[COMPUTER])  == self.maxScore
-
-    # def get
+        return self.score[PLAYER_1] + self.score[PLAYER_2] + sum(self.board[PLAYER_1]) + sum(self.board[PLAYER_2])  == self.maxScore
