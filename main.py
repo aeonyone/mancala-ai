@@ -1,4 +1,5 @@
 from assets.game import Game
+# from assets.player import Player
 from assets.constants import *
 
 # TODO:
@@ -16,31 +17,34 @@ from assets.constants import *
         #  
 
 def main():
-    # Init game with no custom board state or custom AI
-    game = Game()
+    # player_1 = Player(type='Human', name='Player 1')
+    # player_2 = Player(type='Computer', name='Player 2')
+    game = Game(type='primary')
 
-    # Start game
-    while(True):
-        legalMoves = game.board.generateLegalMoves(game.activePlayer,game.turnNr,game.turnMove)
-        game.prepareTurn(legalMoves)
-        selectedPit = game.selectPit(legalMoves)
-        if legalMoves != []:
-            if game.executeTurn(selectedPit,legalMoves):
-                game.turnMove += 1
-            else: # If turn ends
-                game.turnMove = 0
-
-        if game.winner() != None:
-            # NB! Bug if one side gets additional move, but is without seeds. The game does not end.
-            print('\nFinal board:\n')
-            game.board.drawBoard()
-            print("\n Winner is " + game.winner() + "\n")
+    # Run game
+    while True:
+        if game.execute_turn(): # If game is over
             break
 
-        elif game.status != 'ONGOING':
-            print("\n Game over!\n")
-            break
+    print(f"\nFinal board:")
+    game.board.draw_board()
+    # If no legal moves, move count pits to players stores
+    if game.legal_moves == []:
+        p1_score, p2_score = game.board.score[PLAYER_1] + sum(game.board.board[PLAYER_1]), game.board.score[PLAYER_2] + sum(game.board.board[PLAYER_2])
+    else:
+        p1_score, p2_score = game.board.score[PLAYER_1], game.board.score[PLAYER_2]
+    
+    print(f"SCORE: {PLAYER_1} {p1_score} : {PLAYER_2} {p2_score}")
+    # game.winner = game.board.check_winner()
+    if p1_score > p2_score:
+        game.winner = PLAYER_1
+    elif p1_score < p2_score:
+        game.winner = PLAYER_2
+    else:
+        game.winner = "DRAW"
+        
+    print(f"\nWinner is {game.winner}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

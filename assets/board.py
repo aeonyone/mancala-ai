@@ -3,10 +3,6 @@ from .constants import *
 import numpy as np
 
 
-
-# Increment all pits
-
-
 class Board:
     def __init__(self,board=None) -> None:
         # Init custom board or create default one
@@ -20,16 +16,23 @@ class Board:
         self.score = {PLAYER_1 : 0, PLAYER_2 : 0}
         self.maxScore = PITS * SEEDS * 2
 
-    def drawBoard(self):
+
+    def legal_moves(self,activePlayer,turn,move):
+        moves = []
+        for pit, i in zip(self.board[activePlayer], range(1, 7)):
+            if pit > 0:
+                moves.append(i)
+        return moves
+
+    def draw_board(self):
         # NB! Fix the hardcoded oponnent and player keys
         playerBoard = self.board[PLAYER_1]
         opponentBoard = list(reversed(self.board[PLAYER_2]))
-        
-        print(" ",opponentBoard) # Reverse opponent board
+        print("\n ",opponentBoard) # Reverse opponent board
         print(self.score[PLAYER_2], " " * 19, self.score[PLAYER_1]) # Stores
         print(" ", playerBoard)  # Player board
 
-    def sowSeeds(self, activePlayer, pit):
+    def sow_seeds(self, activePlayer, pit):
         # NB! Use numpy array for board to increment all pits at once
         activePit = pit - 1 # Take note of the active pit and map it to the list
         seedsInHand = self.board[activePlayer][activePit] # Get seeds from pit
@@ -64,7 +67,7 @@ class Board:
                     # Set active pit to 0
                     activePit = 0
                     # Switch active board side
-                    activeBoardSide = self.switchActiveBoardSide(activeBoardSide)
+                    activeBoardSide = self.switch_side(activeBoardSide)
                     continue
             else: # If current board side is opponent's
                 # Two cases are possible:
@@ -82,40 +85,25 @@ class Board:
                     # Set active pit to -1 (to be incremented to 0)
                     activePit = -1
                     # Switch active board side
-                    activeBoardSide = self.switchActiveBoardSide(activeBoardSide)
+                    activeBoardSide = self.switch_side(activeBoardSide)
                     continue
                 
         # Capture logic. Check if last seed was dropped in empty pit in active player's side and if opponent's pit is not empty
         if activeBoardSide == activePlayer:
             if self.board[activePlayer][activePit] == 1:
-                if self.board[self.switchActiveBoardSide(activePlayer)][PITS - activePit - 1] > 0:
+                if self.board[self.switch_side(activePlayer)][PITS - activePit - 1] > 0:
                     # Take all seeds from both pits
-                    self.score[activePlayer] += self.board[activePlayer][activePit] + self.board[self.switchActiveBoardSide(activePlayer)][PITS - activePit - 1]
-                    self.board[activePlayer][activePit] = self.board[self.switchActiveBoardSide(activePlayer)][PITS - activePit - 1] = 0
+                    self.score[activePlayer] += self.board[activePlayer][activePit] + self.board[self.switch_side(activePlayer)][PITS - activePit - 1]
+                    self.board[activePlayer][activePit] = self.board[self.switch_side(activePlayer)][PITS - activePit - 1] = 0
         return False
 
-    def switchActiveBoardSide(self,activeBoardSide):
+    def switch_side(self,activeBoardSide):
         if activeBoardSide == PLAYER_1:
             return PLAYER_2
         else: #PLAYER_2
             return PLAYER_1
 
-    def generateLegalMoves(self,activePlayer,turnNr,turnMove):
-        moves = []
-        for pit, i in zip(self.board[activePlayer], range(1, 7)):
-            if pit > 0:
-                moves.append(i)
-        if turnNr == 1 and turnMove == 0: # Allow to rotate board after first turn
-            moves.append(0)
-        return moves
-
-    def allPitsToPlayersStores(self):
-        self.score[PLAYER_1] += sum(self.board[PLAYER_1]) 
-        self.score[PLAYER_2] += sum(self.board[PLAYER_2])
-        self.board[PLAYER_1] = self.board[PLAYER_2] = [0] * PITS
-        return 'DONE'
-
-    def rotateBoard(self):
+    def rotate_board(self):
         # Rotate board
         tempBoard = self.board[PLAYER_2]
         self.board[PLAYER_2] = self.board[PLAYER_1]
@@ -126,7 +114,7 @@ class Board:
         self.score[PLAYER_1] = tempScore
 
     # Check if game is over
-    def winner(self):
+    def check_winner(self):
         if self.score[PLAYER_1] > self.maxScore / 2:
             return PLAYER_1
         elif self.score[PLAYER_2] > self.maxScore / 2:
@@ -136,9 +124,8 @@ class Board:
 
         return None
 
-    def evaluateBoard(self):
-        return self.score[PLAYER_2] - self.score[PLAYER_1]
-
-
-    def isBoardValid(self):
+    def is_board_valid(self):
         return self.score[PLAYER_1] + self.score[PLAYER_2] + sum(self.board[PLAYER_1]) + sum(self.board[PLAYER_2])  == self.maxScore
+
+    def evaluate_position(self):
+        return self.board.score[PLAYER_2] - self.board.score[PLAYER_1]
