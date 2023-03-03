@@ -4,21 +4,32 @@ import random
 from .constants import *
 from assets.board import Board
 from assets.model import Model
-# from assets.game import Player
 
 class Game:
-    def __init__(self, type=str, starting_player=None, board=None, model=None) -> None:
+    def __init__(self, type=str, player_1=object, player_2=object, starting_player=None, board=None, model=None) -> None:
         self.type = type
+        self.player_1 = player_1
+        self.player_2 = player_2
         self.starting_player = WHO_STARTS_GAME if starting_player is None else starting_player
-        self.board = Board(BOARD_STARTING_STATE) if board is None else board
-        self.model = Model(AI_MODEL) if model is None else model
-        if self.starting_player == RANDOM:
-            if random.randint(0,1) == 0:
-                self.activePlayer = PLAYER_1
-            else:
-                self.activePlayer = PLAYER_2
+        self.board = Board(player_1=self.player_1, player_2=self.player_2) if board is None else board
+        self.model = Model() if model is None else model
+        
+        # Define starting player
+        if self.starting_player == 'Random':
+            self.active_player = random.choice([self.player_1, self.player_1])
+        elif self.starting_player == 'Player 1':
+            self.active_player = self.player_1
+        elif self.starting_player == 'Player 2':
+            self.active_player = self.player_2
         else:
-            self.activePlayer = self.starting_player
+            raise ValueError('Invalid starting player')
+        
+        # Define passive player
+        if self.active_player == self.player_1:
+            self.passive_player = self.player_2
+        else:
+            self.passive_player = self.player_1
+
         self.turn = 0
         self.move = 0
         self.winner = None
@@ -26,7 +37,7 @@ class Game:
 
     def execute_turn(self):
         # Info about turn
-        print(f"TURN BEGINS - {self.activePlayer}")
+        print(f"TURN BEGINS - {self.active_player.name}")
         print(f"turn: {self.turn} move: {self.move}")
         # Validate board
         if not self.board.is_board_valid(): 
@@ -34,13 +45,13 @@ class Game:
         # Several moves can be made in one turn
         while True:
             # Find legal moves
-            self.legal_moves = self.board.legal_moves(self.activePlayer,self.turn,self.move)
+            self.legal_moves = self.board.get_legal_moves(self.active_player)
             if self.turn == 1 and self.move == 0: # Allow to rotate board after first turn
                 self.legal_moves.append(0)
 
             # Check if legal moves exist
             if self.legal_moves == []: 
-                print(f"\nNo legal moves for {self.activePlayer}")
+                print(f"\nNo legal moves for {self.active_player.name}")
                 return True
 
             # Check if game has winner
@@ -58,7 +69,7 @@ class Game:
             if pit == 0: # Special case
                 self.board.rotate_board() 
                 break
-            elif not self.board.sow_seeds(self.activePlayer,pit): # If no additional move
+            elif not self.board.apply_move(self.active_player,pit): # If no additional move
                 break
             else: # Additional move
                 self.move += 1
@@ -69,7 +80,7 @@ class Game:
 
 
     def select_pit(self, legal_moves=None):
-        if self.activePlayer == "Human":
+        if self.active_player.type == "Human":
             while(True):
                 pit = None
                 try:
@@ -89,18 +100,19 @@ class Game:
                 pit = random.choice(legal_moves)
                 print("Computer chooses pit:" + str(pit))
                 return pit
-            else: # Computer
-                self.model._initTurn(self)
-                pit, value = self.model.bestTurn(self.model.algorithm, self.board, self.model.depth, True, self.model.negInf, self.model.posInf)
+            else:
+                can_rotate = 0 in legal_moves
+                can_opponent_rotate = self.turn == 0
+                pit, value = self.model.best_turn(self.board, self.active_player, self.passive_player, can_rotate, can_opponent_rotate)
                 print("\nComputer evaluates board to " + str(value))
+                print("Computer chooses pit:" + str(pit))
                 return pit
 
-
     def change_turn(self):
-        if self.activePlayer == PLAYER_1:
-            self.activePlayer = PLAYER_2
+        if self.active_player == self.player_1:
+            self.active_player, self.passive_player = self.player_2, self.player_1
         else:
-            self.activePlayer = PLAYER_1
+            self.active_player, self.passive_player = self.player_1, self.player_2
         self.turn += 1
         self.move = 0
         print("-" * 20)

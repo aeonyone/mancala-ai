@@ -1,5 +1,5 @@
 from assets.game import Game
-# from assets.player import Player
+from assets.player import Player
 from assets.constants import *
 
 # TODO:
@@ -17,9 +17,9 @@ from assets.constants import *
         #  
 
 def main():
-    # player_1 = Player(type='Human', name='Player 1')
-    # player_2 = Player(type='Computer', name='Player 2')
-    game = Game(type='primary')
+    player_1 = Player(type='Human', name='Player 1')
+    player_2 = Player(type='Computer', name='Player 2')
+    game = Game(type='primary',player_1=player_1, player_2=player_2)
 
     # Run game
     while True:
@@ -30,16 +30,16 @@ def main():
     game.board.draw_board()
     # If no legal moves, move count pits to players stores
     if game.legal_moves == []:
-        p1_score, p2_score = game.board.score[PLAYER_1] + sum(game.board.board[PLAYER_1]), game.board.score[PLAYER_2] + sum(game.board.board[PLAYER_2])
+        p1_score, p2_score = game.board.score[game.board.player_1] + sum(game.board.board[game.board.player_1]), game.board.score[game.board.player_2] + sum(game.board.board[game.board.player_2])
     else:
-        p1_score, p2_score = game.board.score[PLAYER_1], game.board.score[PLAYER_2]
+        p1_score, p2_score = game.board.score[game.board.player_1], game.board.score[game.board.player_2]
     
-    print(f"SCORE: {PLAYER_1} {p1_score} : {PLAYER_2} {p2_score}")
+    print(f"\nSCORE:\n{game.board.player_1.name}: {p1_score}\n{game.board.player_2.name}: {p2_score}")
     # game.winner = game.board.check_winner()
     if p1_score > p2_score:
-        game.winner = PLAYER_1
+        game.winner = game.board.player_1.name
     elif p1_score < p2_score:
-        game.winner = PLAYER_2
+        game.winner = game.board.player_2.name
     else:
         game.winner = "DRAW"
         
