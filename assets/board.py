@@ -9,15 +9,24 @@ class Board:
         # Init custom board or create default one
         self.player_1 = player_1
         self.player_2 = player_2
-        if BOARD_STARTING_STATE == None:
+        # Init board
+        if board:
+            self.board = board
+        elif BOARD_STARTING_STATE == None:
             self.board = {self.player_1 : [], self.player_2 : []}
             for i in self.board:
                 for j in range(PITS):
                     self.board[i].append(SEEDS)
-        else:
+        elif BOARD_STARTING_STATE:
             self.board = {self.player_1 : BOARD_STARTING_STATE['Player 1'], self.player_2 : BOARD_STARTING_STATE['Player 2']}
-            
-        self.score = {self.player_1 : 0, self.player_2 : 0}
+        else:
+            raise ValueError('Invalid board starting state')
+        # Init score
+        if score:
+            self.score = score
+        else:
+            self.score = {self.player_1 : 0, self.player_2 : 0}
+
         self.max_score = PITS * SEEDS * 2
         self.previous_state = previous_state
 

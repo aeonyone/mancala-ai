@@ -26,14 +26,15 @@ class Model:
 
     def best_turn(self, board, active_player, passive_player, can_rotate, can_opponent_rotate):
         # Create node
-        node = Board() # Fix redundant board generation, pass board as argument
-        node.board = {True: board.board[active_player], False: board.board[passive_player]}
-        node.score = {True: board.score[active_player], False: board.score[passive_player]}
-        node.player_1 = True
-        node.player_2 = False
+        node = Board(
+            board={True: board.board[active_player], False: board.board[passive_player]}
+            , score={True: board.score[active_player], False: board.score[passive_player]}
+            , player_1=True
+            , player_2=False
+        )
         self.can_rotate = can_rotate
         self.can_opponent_rotate = can_opponent_rotate
-
+        
         if self.algorithm == 'minimax':
             return self.minimax(node, self.depth, True)
         elif self.algorithm == 'alphabeta':
@@ -58,19 +59,19 @@ class Model:
             # Search each child of node
             for pit in legal_moves:
                 value = self.negInf
-                tmp_node = deepcopy(node)
+                sub_node = deepcopy(node)
                 # Apply move
                 while True:
                     if pit == 0:
-                        tmp_node.rotate_board()
+                        sub_node.rotate_board()
                         break
-                    elif not tmp_node.apply_move(True, pit):
+                    elif not sub_node.apply_move(True, pit):
                         break
                     else: # Additional move
-                        value = max(value, self.minimax(tmp_node, depth - 1, True))
+                        value = max(value, self.minimax(sub_node, depth - 1, True))
                 
                 # Record value for each pit
-                scoring[pit] = max(value, self.minimax(tmp_node, depth - 1, False))
+                scoring[pit] = max(value, self.minimax(sub_node, depth - 1, False))
 
             # Maximum value at the position
             value = max(value, scoring[max(scoring, key=scoring.get)])
@@ -103,15 +104,15 @@ class Model:
             # Search each child of node
             for pit in legal_moves:
                 value = self.posInf
-                tmp_node = deepcopy(node)
+                sub_node = deepcopy(node)
                 # Apply move
                 while True:
-                    if not tmp_node.apply_move(False, pit):
+                    if not sub_node.apply_move(False, pit):
                         break
                     else: # Additional move
-                        value = min(value, self.minimax(tmp_node, depth - 1, False))
+                        value = min(value, self.minimax(sub_node, depth - 1, False))
                 # Get value and pit pairs
-                scoring[pit] = min(value, self.minimax(tmp_node, depth - 1, True))
+                scoring[pit] = min(value, self.minimax(sub_node, depth - 1, True))
 
             # Minimum value at the position
             value = min(value, scoring[min(scoring, key=scoring.get)])

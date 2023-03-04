@@ -4,6 +4,7 @@ import random
 from .constants import *
 from assets.board import Board
 from assets.model import Model
+import time
 
 class Game:
     def __init__(self, type=str, player_1=object, player_2=object, starting_player=None, board=None, model=None) -> None:
@@ -103,8 +104,10 @@ class Game:
             else:
                 can_rotate = 0 in legal_moves
                 can_opponent_rotate = self.turn == 0
+                start_time = time.time()
                 pit, value = self.model.best_turn(self.board, self.active_player, self.passive_player, can_rotate, can_opponent_rotate)
-                print("\nComputer evaluates board to " + str(value))
+                print("\nTime taken: " + str(time.time() - start_time))
+                print("Computer evaluates board to " + str(value))
                 print("Computer chooses pit:" + str(pit))
                 return pit
 
