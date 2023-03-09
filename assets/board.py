@@ -20,7 +20,7 @@ class Board:
         elif BOARD_STARTING_STATE:
             self.board = {self.player_1 : BOARD_STARTING_STATE['Player 1'], self.player_2 : BOARD_STARTING_STATE['Player 2']}
         else:
-            raise ValueError('Invalid board starting state')
+            raise ValueError('Cannot init board')
         # Init score
         if score:
             self.score = score
@@ -48,6 +48,9 @@ class Board:
 
     def apply_move(self, active_player, pit):
         # NB! Use numpy array for board to increment all pits at once
+        # Validate move
+        if pit not in [1, 2, 3, 4, 5, 6]:
+            raise ValueError('Invalid pit')
         # Apply move
         active_pit = pit - 1 # Take note of the active pit and map it to the list
         seeds_in_hand = self.board[active_player][active_pit] # Get seeds from pit
@@ -149,3 +152,10 @@ class Board:
 
     def evaluate_position(self, proponent, opponent):
         return self.score[proponent] - self.score[opponent]
+
+    def heuristic_value(self, proponent):
+        value = 0
+        for i in range(PITS):
+            if self.board[proponent][i] == i + 1:
+                value += 1
+        return value
