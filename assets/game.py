@@ -7,8 +7,7 @@ from assets.model import Model
 import time
 
 class Game:
-    def __init__(self, type=str, player_1=object, player_2=object, starting_player=None, board=None, model=None) -> None:
-        self.type = type
+    def __init__(self, player_1=object, player_2=object, starting_player=None, board=None, model=None) -> None:
         self.player_1 = player_1
         self.player_2 = player_2
         self.starting_player = WHO_STARTS_GAME if starting_player is None else starting_player

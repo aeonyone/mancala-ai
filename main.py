@@ -17,9 +17,10 @@ from assets.constants import *
         #  
 
 def main():
-    player_1 = Player(type='Human', name='Player 1')
-    player_2 = Player(type='Computer', name='Player 2')
-    game = Game(type='primary',player_1=player_1, player_2=player_2)
+    game = Game(
+        player_1=Player(type=PLAYER_1_TYPE, name=PLAYER_1_NAME)
+        , player_2=Player(type=PLAYER_2_TYPE, name=PLAYER_2_NAME)
+        )
 
     # Run game
     while True:
