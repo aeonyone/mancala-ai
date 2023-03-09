@@ -45,7 +45,7 @@ class Model:
     def minimax(self, node, depth, maximizing_player):
         # Terminal state
         if depth == 0 or node.check_winner() != None:
-            return node.evaluate_position(True, False)
+            return node.evaluate_position(True, False) + node.heuristic_value(True)
         
         # Maximizer
         if maximizing_player:
