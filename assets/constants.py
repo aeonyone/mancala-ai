@@ -5,10 +5,10 @@ SEEDS = 4 # Number of seeds in each pit
 
 LIST_LEN = PITS - 1 # Do not modify
 # Change to PLAYER_1 and PLAYER_2
-PLAYER_1_TYPE = 'Computer' # Valid values [Human, Computer]
-PLAYER_1_NAME = 'Randy' # Do not modify
-PLAYER_2_TYPE = 'Human' # Valid values [Human, Computer]
-PLAYER_2_NAME = 'Niklavs' # Do not modify
+PLAYER_1_TYPE = 'Human' # Valid values [Human, Computer]
+PLAYER_1_NAME = 'Caro Kann' # Do not modify
+PLAYER_2_TYPE = 'Computer' # Valid values [Human, Computer]
+PLAYER_2_NAME = 'Randy' # Do not modify
 RANDOM = 'Random' # Do not modify
 
 
