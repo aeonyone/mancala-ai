@@ -2,19 +2,6 @@ from assets.game import Game
 from assets.player import Player
 from assets.constants import *
 
-# TODO:
-    # Implement treading to paralellize e.g. AI evaluation at terminal node
-    # Or parallelize all AI action, however then alphabeta would not work easily 
-# Interesting points to consider:
-    # 1.
-        # Why does computer priorites capture over pitting 1 bean at pit 6 AND then immediately capture
-        # Need to test, maybe it happens in scenarios where I cannot increment the pit 6
-    # 2. 
-        # Is odd minimax depth more aggresive due to max function at bottom of the tree
-        # And the other way, is even mimimax depth more defensive
-        # Can it be that odd minimax at depth N loses to even minimax at depth N - 1?
-        # 
-        #  
 
 def main():
     game = Game(

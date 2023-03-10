@@ -1,20 +1,10 @@
-from copy import deepcopy
 import random
+from copy import deepcopy
 from .constants import *
 from assets.board import Board
 
-# NB ! Implement shallow, e.g. 6 - 7 layers of investigative minimax, and then for best few branches go really deep
-    # 20% / 80 % effort respectively
-
-# NB ! Test what is best way to sort legal moves (e.g. by size or by position), to improve pruning 
-
-# Maybe game.self should be passed in the model, it would simplify a lot?
-# Fix bug where "TypeError: cannot unpack non-iterable int object" if computer must make turn, but can't
-# Fix bug where game does not end, if player cannot make turn
 # Need to generalize actions between both minimax and alphabeta models
 
-# NB! Make tests for model, alphabeta is definitely losing information in the pruning process
-    # However, this loss is not apparent in shallow levels
 class Model:
     def __init__(self, algorithm=None, depth=None) -> None:
         # Use default model if not otherwise specified

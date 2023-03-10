@@ -1,8 +1,5 @@
-from copy import deepcopy
-from multiprocessing.dummy import active_children
 from .constants import *
-import numpy as np
-
+# import numpy as np
 
 class Board:
     def __init__(self, board=None, score=None, previous_state=None, player_1=None, player_2=None) -> None:
@@ -144,7 +141,6 @@ class Board:
             return self.player_2
         elif self.score[self.player_1] == self.score[self.player_2] ==  self.max_score / 2:
             return 'DRAW'
-
         return None
 
     def is_board_valid(self):

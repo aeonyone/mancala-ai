@@ -1,10 +1,9 @@
 import random
-# import threading
-
+import time
 from .constants import *
 from assets.board import Board
 from assets.model import Model
-import time
+
 
 class Game:
     def __init__(self, player_1=object, player_2=object, starting_player=None, board=None, model=None) -> None:
@@ -33,7 +32,6 @@ class Game:
         self.turn = 0
         self.move = 0
         self.winner = None
-
 
     def execute_turn(self):
         # Info about turn
@@ -64,7 +62,6 @@ class Game:
             # Select pit
             pit = self.select_pit(self.legal_moves)
 
-            # NB! Fix bug with not showing board before turn is made. This is actually threading bug somehow with sleep
             # Execute turn
             if pit == 0: # Special case
                 self.board.rotate_board() 
@@ -77,7 +74,6 @@ class Game:
 
         # Change turn
         self.change_turn()
-
 
     def select_pit(self, legal_moves=None):
         if self.active_player.type == "Human":
