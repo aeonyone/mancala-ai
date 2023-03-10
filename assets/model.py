@@ -44,8 +44,8 @@ class Model:
     
     def minimax(self, node, depth, maximizing_player):
         # Terminal state
-        if depth == 0 or node.check_winner() != None:
-            return node.evaluate_position(True, False) + node.heuristic_value(True)
+        if depth == 0:
+            return node.evaluate_position(True, False) + node.heuristic_value(True) - node.heuristic_value(False)
         
         # Maximizer
         if maximizing_player:
@@ -133,14 +133,14 @@ class Model:
             for pit in get_legal_moves:
                 sideBranch = value
                 # Replicate board
-                tempBoard = deepcopy(board)
+                temp_board = deepcopy(board)
                 while(True):
-                    if not tempBoard.apply_move(PLAYER_2, pit):
+                    if not temp_board.apply_move(PLAYER_2, pit):
                         break
                     else: # Additional move
-                        sideBranch = self.alphabeta(tempBoard, depth - 1, True, alpha, beta) # Launch new branch
+                        sideBranch = self.alphabeta(temp_board, depth - 1, True, alpha, beta) # Launch new branch
                         break
-                scoreDict[pit] = max(sideBranch, self.alphabeta(tempBoard, depth - 1, False, alpha, beta))
+                scoreDict[pit] = max(sideBranch, self.alphabeta(temp_board, depth - 1, False, alpha, beta))
                 alpha = max(alpha, scoreDict[pit])
                 # Pruning
                 if beta <= alpha:
@@ -169,14 +169,14 @@ class Model:
                 get_legal_moves.append(0)
             for pit in get_legal_moves:
                 sideBranch = value
-                tempBoard = deepcopy(board)
+                temp_board = deepcopy(board)
                 while(True):
-                    if not tempBoard.apply_move(PLAYER_1, pit):
+                    if not temp_board.apply_move(PLAYER_1, pit):
                         break
                     else: # Additional move
-                        sideBranch = self.alphabeta(tempBoard, depth - 1, False, alpha, beta) # Launch new branch
+                        sideBranch = self.alphabeta(temp_board, depth - 1, False, alpha, beta) # Launch new branch
                         break
-                scoreDict[pit] = min(sideBranch, self.alphabeta(tempBoard, depth - 1, True, alpha, beta))
+                scoreDict[pit] = min(sideBranch, self.alphabeta(temp_board, depth - 1, True, alpha, beta))
                 beta = min(beta, scoreDict[pit])
                 # Pruning
                 if beta <= alpha:

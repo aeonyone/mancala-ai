@@ -84,4 +84,27 @@ class TestBoard:
         pass
 
     def test_heuristic_value(self):
-        pass
+        # N == N test for single player
+        x = self.init_board({True : [6, 5, 4, 3, 2, 1], False : [0, 0, 0, 0, 0, 0]})
+        assert x.heuristic_value(True) - x.heuristic_value(False) == 11
+        # N == N test for both players
+        x = self.init_board({True : [6, 5, 4, 3, 2, 1], False : [6, 5, 4, 3, 2, 1]})
+        assert x.heuristic_value(True) - x.heuristic_value(False) == 0
+        # Test 1 pit clear
+        x = self.init_board({True : [0, 0, 0, 0, 0, 1], False : [0, 0, 0, 0, 0, 0]})
+        assert x.heuristic_value(True) - x.heuristic_value(False) == 1
+        # Test 2 pits clear
+        x = self.init_board({True : [0, 0, 0, 0, 2, 1], False : [0, 0, 0, 0, 0, 0]})
+        assert x.heuristic_value(True) - x.heuristic_value(False) == 3
+        # Test 3 pits clear
+        x = self.init_board({True : [0, 0, 0, 3, 1, 1], False : [0, 0, 0, 0, 0, 0]})
+        assert x.heuristic_value(True) - x.heuristic_value(False) == 5
+        # Test that N - 1 pit clear logic is not doublecounted after N pit clear
+        x = self.init_board({True : [0, 0, 4, 3, 1, 1], False : [0, 0, 0, 0, 0, 0]})
+        assert x.heuristic_value(True) - x.heuristic_value(False) == 7
+        # Test 4 pits clear
+        x = self.init_board({True : [0, 0, 4, 2, 0, 1], False : [0, 0, 0, 0, 0, 0]})
+        assert x.heuristic_value(True) - x.heuristic_value(False) == 7
+        # Test 4 pits clear and N == N
+        x = self.init_board({True : [0, 0, 4, 2, 0, 1], False : [0, 0, 4, 0, 0, 1]})
+        assert x.heuristic_value(True) - x.heuristic_value(False) == 4
