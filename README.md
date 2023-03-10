@@ -8,8 +8,8 @@ The mancala games are a family of two-player turn-based strategy board games pla
 To configure game, edit constants.py
 
 #### Play
-To play, execute following command in the directory. 
+To play, execute following command in the directory. "-u" option is recommended to avoid buffering stdout streams and improve responsiveness.
 ```
-py main.py
+py -u main.py
 ```
 Select turn by inputting numbers 1 to 6. On the second turn it is also possible to input 0 to turn the board according to pie rule.
